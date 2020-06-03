@@ -1,16 +1,14 @@
-package main_test
+package staticfile_test
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/paketo-buildpacks/packit"
-	main "github.com/paketo-buildpacks/staticfile"
-	"github.com/paketo-buildpacks/staticfile/fakes"
+	"github.com/paketo-community/staticfile"
+	"github.com/paketo-community/staticfile/fakes"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -32,16 +30,16 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		bpYMLParser = &fakes.BpYMLParser{}
 
-		detect = main.Detect(bpYMLParser)
+		detect = staticfile.Detect(bpYMLParser)
 	})
 
 	it.After(func() {
 		Expect(os.RemoveAll(workingDir)).To(Succeed())
 	})
 
-	context("when the buildpack.yml says to use the Staticfile buildpack", func() {
+	context("when the buildpack.yml indicates it wants an nginx config", func() {
 		it.Before(func() {
-			bpYMLParser.ParseCall.Returns.Server = "nginx"
+			bpYMLParser.ValidConfigCall.Returns.Valid = true
 		})
 
 		it("detects", func() {
@@ -50,31 +48,26 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Plan).To(Equal(packit.BuildPlan{
+				Provides: []packit.BuildPlanProvision{
+					{
+						Name: "staticfile",
+					},
+				},
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: "nginx",
+					},
+					{
+						Name: "staticfile",
 					},
 				},
 			}))
 		})
 	})
 
-	context("when the buildpack.yml specifies an invalid server", func() {
+	context("when the buildpack.yml does not indicate it wants an nginx config", func() {
 		it.Before(func() {
-			bpYMLParser.ParseCall.Returns.Server = "invalid-server"
-		})
-
-		it("detects", func() {
-			_, err := detect(packit.DetectContext{
-				WorkingDir: workingDir,
-			})
-			Expect(err).To(MatchError(fmt.Errorf(`"invalid-server" is not a supported server: supported servers are: [%s]`, strings.Join(main.SupportedServers, ","))))
-		})
-	})
-
-	context("when the buildpack.yml does not specify a server", func() {
-		it.Before(func() {
-			bpYMLParser.ParseCall.Returns.Server = ""
+			bpYMLParser.ValidConfigCall.Returns.Valid = false
 		})
 		it("detect fails with an error", func() {
 			_, err := detect(packit.DetectContext{
@@ -88,13 +81,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	context("error cases", func() {
 		context("when unable to parse buildpack.yml", func() {
 			it("returns an error", func() {
-				bpYMLParser.ParseCall.Returns.Server = ""
-				bpYMLParser.ParseCall.Returns.Err = errors.New("big bad error")
+				bpYMLParser.ValidConfigCall.Returns.Err = errors.New("some-error")
 
 				_, err := detect(packit.DetectContext{
 					WorkingDir: workingDir,
 				})
-				Expect(err).To(MatchError(`unable to parse buildpack.yml: "big bad error"`))
+				Expect(err).To(MatchError(`unable to parse buildpack.yml: "some-error"`))
 
 			})
 		})

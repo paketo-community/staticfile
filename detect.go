@@ -1,51 +1,46 @@
-package main
+package staticfile
 
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/paketo-buildpacks/packit"
 )
 
 //go:generate faux --interface BpYMLParser --output fakes/bp_yml_parser.go
 type BpYMLParser interface {
-	Parse(path string) (server string, err error)
+	ValidConfig(path string) (valid bool, err error)
+	Parse(path string) (config Config, err error)
 }
-
-var SupportedServers = []string{"nginx"}
 
 func Detect(bpYMLParser BpYMLParser) packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
 
-		server, err := bpYMLParser.Parse(filepath.Join(context.WorkingDir, "buildpack.yml"))
+		valid, err := bpYMLParser.ValidConfig(filepath.Join(context.WorkingDir, "buildpack.yml"))
 		if err != nil {
 			return packit.DetectResult{}, fmt.Errorf("unable to parse buildpack.yml: %q", err)
 		}
 
-		if server == "" {
+		if !valid {
 			return packit.DetectResult{}, packit.Fail
-		} else if !serverSupported(server) {
-			return packit.DetectResult{}, fmt.Errorf("%q is not a supported server: supported servers are: [%s]", server, strings.Join(SupportedServers, ","))
 		}
 
 		return packit.DetectResult{
 			Plan: packit.BuildPlan{
+				Provides: []packit.BuildPlanProvision{
+					{
+						Name: StaticfileDependency,
+					},
+				},
 				Requires: []packit.BuildPlanRequirement{
 					{
-						Name: server,
+						Name: NginxDependency,
+					},
+					{
+						Name: StaticfileDependency,
 					},
 				},
 			},
 		}, nil
 	}
-}
-
-func serverSupported(server string) bool {
-	for _, supportedServer := range SupportedServers {
-		if server == supportedServer {
-			return true
-		}
-	}
-	return false
 }

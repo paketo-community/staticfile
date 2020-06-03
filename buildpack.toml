@@ -1,7 +1,7 @@
 api = "0.2"
 
 [buildpack]
-  id = "paketo-buildpacks/staticfile"
+  id = "paketo-community/staticfile"
   name = "Staticfile Buildpack"
   version = "0.0.2"
 
@@ -9,5 +9,5 @@ api = "0.2"
   id = "org.cloudfoundry.stacks.cflinuxfs3"
 
 [metadata]
-  include_files = ["bin/build","bin/detect","buildpack.toml"]
+  include_files = ["bin/build","bin/detect","buildpack.toml","server_configs/nginx.conf"]
   pre_package = "./scripts/build.sh"
