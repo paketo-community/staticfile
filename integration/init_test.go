@@ -37,8 +37,8 @@ func TestIntegration(t *testing.T) {
 	buildpack = fmt.Sprintf("%s.tgz", buildpack)
 
 	defer func() {
-		dagger.DeleteBuildpack(buildpack)
-		dagger.DeleteBuildpack(nginxBuildpack)
+		Expect(dagger.DeleteBuildpack(buildpack)).To(Succeed())
+		Expect(dagger.DeleteBuildpack(nginxBuildpack)).To(Succeed())
 	}()
 
 	SetDefaultEventuallyTimeout(5 * time.Second)

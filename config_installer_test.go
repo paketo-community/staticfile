@@ -1,7 +1,6 @@
 package staticfile_test
 
 import (
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -84,32 +83,6 @@ func testConfigInstaller(t *testing.T, when spec.G, it spec.S) {
 		})
 	})
 
-	it("parses the nginx conf without erroring", func() {
-		Expect(os.MkdirAll(filepath.Join(buildpackDir, "server_configs"), os.ModePerm)).To(Succeed())
-		confPath := filepath.Join(buildpackDir, "server_configs", "nginx.conf")
-
-		Copy("server_configs/nginx.conf", confPath)
-
-		err := configInstaller.Execute(packit.BuildContext{
-			CNBPath:    buildpackDir,
-			WorkingDir: workingDir,
-			Plan: packit.BuildpackPlan{
-				Entries: []packit.BuildpackPlanEntry{
-					{
-						Name: "staticfile",
-					},
-				},
-			},
-		},
-			config,
-		)
-
-		Expect(err).NotTo(HaveOccurred())
-
-		appConfPath := filepath.Join(workingDir, "nginx.conf")
-		Expect(appConfPath).To(BeARegularFile())
-	})
-
 	when("error cases", func() {
 		when("the template file can not be found", func() {
 			it.Before(func() {
@@ -175,24 +148,4 @@ func testConfigInstaller(t *testing.T, when spec.G, it spec.S) {
 		})
 	})
 
-}
-
-func Copy(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, in)
-	if err != nil {
-		return err
-	}
-	return out.Close()
 }

@@ -144,6 +144,37 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 		})
 	})
 
+	when("the layers directory cannot be written to", func() {
+		it.Before(func() {
+			Expect(os.Chmod(layersDir, 0000)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Chmod(layersDir, os.ModePerm)).To(Succeed())
+		})
+
+		it("returns an error", func() {
+			_, err := build(packit.BuildContext{
+				WorkingDir: workingDir,
+				CNBPath:    cnbDir,
+				Stack:      "some-stack",
+				BuildpackInfo: packit.BuildpackInfo{
+					Name:    "Some Buildpack",
+					Version: "some-version",
+				},
+				Plan: packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: "staticfile",
+						},
+					},
+				},
+				Layers: packit.Layers{Path: layersDir},
+			})
+			Expect(err).To(MatchError(ContainSubstring("failed to get layer")))
+		})
+	})
+
 	when("parsing the builpack.yml fails", func() {
 		it("errors", func() {
 			bpYMLParser.ParseCall.Returns.Err = errors.New("some-error")

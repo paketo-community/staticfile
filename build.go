@@ -36,6 +36,9 @@ func Build(
 		}
 
 		staticfileLayer, err := context.Layers.Get(LayerNameStaticfile, packit.LaunchLayer)
+		if err != nil {
+			return packit.BuildResult{}, fmt.Errorf("failed to get layer: %v", err)
+		}
 
 		logger.Process("Writing profile.d scripts")
 		err = scriptWriter.WriteInitScript(filepath.Join(staticfileLayer.Path, "profile.d"))
