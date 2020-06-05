@@ -2,9 +2,9 @@ package main
 
 import (
 	"os"
-	"time"
 
 	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/chronos"
 	"github.com/paketo-community/staticfile"
 )
 
@@ -13,7 +13,6 @@ func main() {
 	configInstaller := staticfile.NewConfigInstaller()
 	profileDWriter := staticfile.NewProfileDWriter()
 	logEmitter := staticfile.NewLogEmitter(os.Stdout)
-	clock := staticfile.NewClock(time.Now)
 
 	packit.Run(
 		staticfile.Detect(parser),
@@ -22,7 +21,7 @@ func main() {
 			parser,
 			profileDWriter,
 			logEmitter,
-			clock,
+			chronos.DefaultClock,
 		),
 	)
 }

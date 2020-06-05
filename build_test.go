@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/chronos"
 	"github.com/paketo-community/staticfile"
 	"github.com/paketo-community/staticfile/fakes"
 	"github.com/sclevine/spec"
@@ -28,7 +29,7 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 		buffer     *bytes.Buffer
 		timeStamp  time.Time
 
-		clock staticfile.Clock
+		clock chronos.Clock
 
 		installProcess *fakes.InstallProcess
 		bpYMLParser    *fakes.BpYMLParser
@@ -53,7 +54,7 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 		logEmitter := staticfile.NewLogEmitter(buffer)
 
 		timeStamp = time.Now()
-		clock = staticfile.NewClock(func() time.Time {
+		clock = chronos.NewClock(func() time.Time {
 			return timeStamp
 		})
 

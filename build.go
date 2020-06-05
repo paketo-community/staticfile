@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/chronos"
 )
 
 //go:generate faux --interface InstallProcess --output fakes/install_process.go
@@ -24,7 +25,7 @@ func Build(
 	bpYMLParser BpYMLParser,
 	scriptWriter ScriptWriter,
 	logger LogEmitter,
-	clock Clock,
+	clock chronos.Clock,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		logger.Title("%s %s", context.BuildpackInfo.Name, context.BuildpackInfo.Version)
@@ -53,12 +54,15 @@ func Build(
 
 		logger.Process("Executing build process")
 		logger.Subprocess("Filling out nginx.conf template")
-		then := clock.Now()
-		err = installProcess.Execute(context, config)
+
+		duration, err := clock.Measure(func() error {
+			return installProcess.Execute(context, config)
+		})
 		if err != nil {
 			return packit.BuildResult{}, fmt.Errorf("failed to install config: %v", err)
 		}
-		logger.Action("Completed in %s", time.Since(then).Round(time.Millisecond))
+
+		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
 		staticfileLayer.SharedEnv.Default("APP_ROOT", context.WorkingDir)

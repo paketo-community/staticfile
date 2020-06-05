@@ -11,7 +11,6 @@ func TestUnit(t *testing.T) {
 	suite := spec.New("staticfile", spec.Report(report.Terminal{}), spec.Parallel())
 	suite("Build", testBuild)
 	suite("BuildpackYAMLParser", testBuildpackYAMLParser)
-	suite("Clock", testClock)
 	suite("ConfigInstaller", testConfigInstaller)
 	suite("Detect", testDetect)
 	suite("LogEmitter", testLogEmitter)
