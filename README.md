@@ -10,7 +10,7 @@ The buildpack automates the process of creating configuration files for nginx.
   # The name of the Staticfile dependency is "staticfile". This value is considered
   # part of the public API for the buildpack and will not change without a plan
   # for deprecation.
-  name = "nginx"
+  name = "staticfile"
 ```
 
 ## Usage
