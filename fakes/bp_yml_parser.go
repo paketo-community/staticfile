@@ -1,6 +1,10 @@
 package fakes
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/paketo-community/staticfile"
+)
 
 type BpYMLParser struct {
 	ParseCall struct {
@@ -10,14 +14,26 @@ type BpYMLParser struct {
 			Path string
 		}
 		Returns struct {
-			Server string
+			Config staticfile.Config
 			Err    error
 		}
-		Stub func(string) (string, error)
+		Stub func(string) (staticfile.Config, error)
+	}
+	ValidConfigCall struct {
+		sync.Mutex
+		CallCount int
+		Receives  struct {
+			Path string
+		}
+		Returns struct {
+			Valid bool
+			Err   error
+		}
+		Stub func(string) (bool, error)
 	}
 }
 
-func (f *BpYMLParser) Parse(param1 string) (string, error) {
+func (f *BpYMLParser) Parse(param1 string) (staticfile.Config, error) {
 	f.ParseCall.Lock()
 	defer f.ParseCall.Unlock()
 	f.ParseCall.CallCount++
@@ -25,5 +41,15 @@ func (f *BpYMLParser) Parse(param1 string) (string, error) {
 	if f.ParseCall.Stub != nil {
 		return f.ParseCall.Stub(param1)
 	}
-	return f.ParseCall.Returns.Server, f.ParseCall.Returns.Err
+	return f.ParseCall.Returns.Config, f.ParseCall.Returns.Err
+}
+func (f *BpYMLParser) ValidConfig(param1 string) (bool, error) {
+	f.ValidConfigCall.Lock()
+	defer f.ValidConfigCall.Unlock()
+	f.ValidConfigCall.CallCount++
+	f.ValidConfigCall.Receives.Path = param1
+	if f.ValidConfigCall.Stub != nil {
+		return f.ValidConfigCall.Stub(param1)
+	}
+	return f.ValidConfigCall.Returns.Valid, f.ValidConfigCall.Returns.Err
 }
