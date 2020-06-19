@@ -9,5 +9,5 @@ api = "0.2"
   id = "org.cloudfoundry.stacks.cflinuxfs3"
 
 [metadata]
-  include_files = ["bin/build","bin/detect","buildpack.toml","server_configs/nginx.conf"]
+  include_files = ["bin/build","bin/detect","bin/run","buildpack.toml","server_configs/nginx.conf"]
   pre_package = "./scripts/build.sh"
