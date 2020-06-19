@@ -25,13 +25,13 @@ func TestIntegration(t *testing.T) {
 	Expect := NewWithT(t).Expect
 
 	root, err := dagger.FindBPRoot()
-	Expect(err).ToNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 
 	buildpack, err = dagger.PackageBuildpack(root)
 	Expect(err).NotTo(HaveOccurred())
 
 	nginxBuildpack, err = dagger.GetLatestCommunityBuildpack("paketo-buildpacks", "nginx")
-	Expect(err).ToNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 
 	// HACK: we need to fix dagger and the package.sh scripts so that this isn't required
 	buildpack = fmt.Sprintf("%s.tgz", buildpack)
@@ -43,9 +43,9 @@ func TestIntegration(t *testing.T) {
 
 	SetDefaultEventuallyTimeout(5 * time.Second)
 
-	suite := spec.New("Integration", spec.Report(report.Terminal{}))
-	suite("Nginx", testNginx, spec.Parallel())
-	suite("Logging", testLogging, spec.Parallel())
+	suite := spec.New("Integration", spec.Report(report.Terminal{}), spec.Parallel())
+	suite("Nginx", testNginx)
+	suite("Logging", testLogging)
 	suite.Run(t)
 }
 
