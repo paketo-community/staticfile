@@ -5,16 +5,11 @@ go 1.14
 require (
 	cloud.google.com/go v0.57.0 // indirect
 	github.com/cloudfoundry/dagger v0.0.0-20200522150708-5e7c31affc51
-	github.com/kr/text v0.2.0 // indirect
-	github.com/mattn/go-colorable v0.1.6 // indirect
-	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.3.0 // indirect
-	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/onsi/ginkgo v1.12.2 // indirect
 	github.com/onsi/gomega v1.10.1
-	github.com/paketo-buildpacks/occam v0.0.9
+	github.com/paketo-buildpacks/occam v0.0.13
 	github.com/paketo-buildpacks/packit v0.0.15
 	github.com/sclevine/spec v1.4.0
-	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
