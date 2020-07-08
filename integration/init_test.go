@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/dagger"
-	"github.com/paketo-buildpacks/occam"
 	"github.com/paketo-buildpacks/packit/pexec"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
@@ -25,13 +24,13 @@ func TestIntegration(t *testing.T) {
 	Expect := NewWithT(t).Expect
 
 	root, err := dagger.FindBPRoot()
-	Expect(err).ToNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 
 	buildpack, err = dagger.PackageBuildpack(root)
 	Expect(err).NotTo(HaveOccurred())
 
 	nginxBuildpack, err = dagger.GetLatestCommunityBuildpack("paketo-buildpacks", "nginx")
-	Expect(err).ToNot(HaveOccurred())
+	Expect(err).NotTo(HaveOccurred())
 
 	// HACK: we need to fix dagger and the package.sh scripts so that this isn't required
 	buildpack = fmt.Sprintf("%s.tgz", buildpack)
@@ -43,19 +42,10 @@ func TestIntegration(t *testing.T) {
 
 	SetDefaultEventuallyTimeout(5 * time.Second)
 
-	suite := spec.New("Integration", spec.Report(report.Terminal{}))
-	suite("Nginx", testNginx, spec.Parallel())
-	suite("Logging", testLogging, spec.Parallel())
+	suite := spec.New("Integration", spec.Report(report.Terminal{}), spec.Parallel())
+	suite("Nginx", testNginx)
+	suite("Logging", testLogging)
 	suite.Run(t)
-}
-
-func ContainerLogs(id string) func() string {
-	docker := occam.NewDocker()
-
-	return func() string {
-		logs, _ := docker.Container.Logs.Execute(id)
-		return logs.String()
-	}
 }
 
 func GetGitVersion() (string, error) {
