@@ -2,6 +2,7 @@ package integration
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -27,7 +28,9 @@ func testLogging(t *testing.T, when spec.G, it spec.S) {
 	when("when the buildpack is run with pack build", func() {
 		var (
 			image occam.Image
-			name  string
+
+			name   string
+			source string
 		)
 
 		it.Before(func() {
@@ -39,19 +42,23 @@ func testLogging(t *testing.T, when spec.G, it spec.S) {
 		it.After(func() {
 			Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
 			Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
+			Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
 		it("logs useful information for the user", func() {
 			var err error
+			source, err = occam.Source(filepath.Join("testdata", "nginx_helloworld"))
+			Expect(err).NotTo(HaveOccurred())
+
 			var logs fmt.Stringer
 			image, logs, err = pack.WithNoColor().Build.
 				WithNoPull().
 				WithBuildpacks(nginxBuildpack, buildpack).
-				Execute(name, filepath.Join("testdata", "nginx_helloworld"))
-			Expect(err).ToNot(HaveOccurred(), logs.String)
+				Execute(name, source)
+			Expect(err).NotTo(HaveOccurred(), logs.String)
 
 			buildpackVersion, err := GetGitVersion()
-			Expect(err).ToNot(HaveOccurred())
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(logs).To(ContainLines(
 				fmt.Sprintf("Staticfile Buildpack %s", buildpackVersion),
