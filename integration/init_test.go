@@ -2,13 +2,15 @@ package integration
 
 import (
 	"bytes"
-	"fmt"
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/cloudfoundry/dagger"
 	"github.com/paketo-buildpacks/packit/pexec"
+	"github.com/paketo-buildpacks/occam"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
 
@@ -23,22 +25,31 @@ var (
 func TestIntegration(t *testing.T) {
 	Expect := NewWithT(t).Expect
 
-	root, err := dagger.FindBPRoot()
+	var config struct {
+		Nginx string `json:"nginx"`
+	}
+
+	root, err := filepath.Abs("./..")
 	Expect(err).NotTo(HaveOccurred())
 
-	buildpack, err = dagger.PackageBuildpack(root)
+	file, err := os.Open("../integration.json")
 	Expect(err).NotTo(HaveOccurred())
 
-	nginxBuildpack, err = dagger.GetLatestCommunityBuildpack("paketo-buildpacks", "nginx")
+	Expect(json.NewDecoder(file).Decode(&config)).To(Succeed())
+
+	version, err := GetGitVersion()
 	Expect(err).NotTo(HaveOccurred())
 
-	// HACK: we need to fix dagger and the package.sh scripts so that this isn't required
-	buildpack = fmt.Sprintf("%s.tgz", buildpack)
+	buildpackStore := occam.NewBuildpackStore()
 
-	defer func() {
-		Expect(dagger.DeleteBuildpack(buildpack)).To(Succeed())
-		Expect(dagger.DeleteBuildpack(nginxBuildpack)).To(Succeed())
-	}()
+	buildpack, err = buildpackStore.Get.
+	  WithVersion(version).
+		Execute(root)
+	Expect(err).NotTo(HaveOccurred())
+
+	nginxBuildpack, err = buildpackStore.Get.
+	  Execute(config.Nginx)
+	Expect(err).NotTo(HaveOccurred())
 
 	SetDefaultEventuallyTimeout(5 * time.Second)
 
