@@ -4,6 +4,8 @@ on:
   push:
     branches:
     - main
+  repoistory_dipath:
+    types: manual-release
 
 jobs:
   unit:
