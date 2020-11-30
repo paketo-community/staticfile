@@ -48,6 +48,10 @@ func parse(path string) (Config, error) {
 		return Config{}, fmt.Errorf("unable to parse buildpack.yml: %q", err)
 	}
 
+	if buildpack.Staticfile.Nginx != nil && buildpack.Staticfile.Nginx.RootDir == "" {
+		buildpack.Staticfile.Nginx.RootDir = "public"
+	}
+
 	return buildpack.Staticfile, err
 
 }

@@ -79,5 +79,36 @@ func testNginx(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(string(content)).To(ContainSubstring("helloworld"))
 		})
+
+		context("app with custom root", func() {
+			it("builds and runs successfully", func() {
+				var err error
+				source, err = occam.Source(filepath.Join("testdata", "custom_root_app"))
+				Expect(err).NotTo(HaveOccurred())
+
+				var logs fmt.Stringer
+				image, logs, err = pack.WithNoColor().Build.
+					WithPullPolicy("never").
+					WithBuildpacks(nginxBuildpack, buildpack).
+					Execute(name, source)
+				Expect(err).NotTo(HaveOccurred(), logs.String)
+
+				container, err = docker.Container.Run.Execute(image.ID)
+				Expect(err).NotTo(HaveOccurred())
+
+				Eventually(container).Should(BeAvailable())
+
+				response, err := http.Get(fmt.Sprintf("http://localhost:%s", container.HostPort()))
+				Expect(err).NotTo(HaveOccurred())
+				defer response.Body.Close()
+
+				Expect(response.StatusCode).To(Equal(http.StatusOK))
+
+				content, err := ioutil.ReadAll(response.Body)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(string(content)).To(ContainSubstring("helloworld"))
+			})
+		})
 	})
 }
