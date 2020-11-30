@@ -71,6 +71,22 @@ staticfile:
 					"some-staus": "some-code",
 				}))
 			})
+
+			when("the root dir is not specified", func() {
+				it.Before(func() {
+					err := ioutil.WriteFile(path, []byte(`---
+staticfile:
+  nginx: {}
+`), os.ModePerm)
+					Expect(err).NotTo(HaveOccurred())
+				})
+				it("sets RootDir to 'public'", func() {
+					configData, err := buildpackYMLParser.Parse(path)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(configData.Nginx.RootDir).To(Equal("public"))
+				})
+			})
 		})
 
 	})

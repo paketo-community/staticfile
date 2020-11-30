@@ -1,0 +1,4 @@
+---
+staticfile:
+  nginx:
+    root: "dir1/dir2"

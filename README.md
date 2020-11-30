@@ -29,7 +29,7 @@ This builds the buildpack's Go source using `GOOS=linux` by default. You can sup
 ```yaml
 staticfile:
   nginx:
-    root:
+    root:     # default value: "public"
     host_dot_files:
     location_include:
     directory:
