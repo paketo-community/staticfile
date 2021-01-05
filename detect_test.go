@@ -56,9 +56,15 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: "nginx",
+						Metadata: staticfile.BuildPlanMetadata{
+							Launch: true,
+						},
 					},
 					{
 						Name: "staticfile",
+						Metadata: staticfile.BuildPlanMetadata{
+							Launch: true,
+						},
 					},
 				},
 			}))

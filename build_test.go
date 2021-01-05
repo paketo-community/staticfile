@@ -10,13 +10,12 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
 	"github.com/paketo-community/staticfile"
 	"github.com/paketo-community/staticfile/fakes"
 	"github.com/sclevine/spec"
-
-	. "github.com/onsi/gomega"
 )
 
 func testBuild(t *testing.T, when spec.G, it spec.S) {
@@ -34,6 +33,7 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 		installProcess *fakes.InstallProcess
 		bpYMLParser    *fakes.BpYMLParser
 		scriptWriter   *fakes.ScriptWriter
+		entryResolver  *fakes.EntryResolver
 
 		build packit.BuildFunc
 	)
@@ -50,6 +50,14 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 		bpYMLParser = &fakes.BpYMLParser{}
 		scriptWriter = &fakes.ScriptWriter{}
 
+		entryResolver = &fakes.EntryResolver{}
+		entryResolver.ResolveCall.Returns.BuildpackPlanEntry = packit.BuildpackPlanEntry{
+			Name: "staticfile",
+			Metadata: map[string]interface{}{
+				"launch": true,
+			},
+		}
+
 		buffer = bytes.NewBuffer(nil)
 		logEmitter := staticfile.NewLogEmitter(buffer)
 
@@ -62,6 +70,7 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 			installProcess,
 			bpYMLParser,
 			scriptWriter,
+			entryResolver,
 			logEmitter,
 			clock,
 		)
@@ -94,6 +103,9 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 					Entries: []packit.BuildpackPlanEntry{
 						{
 							Name: "staticfile",
+							Metadata: map[string]interface{}{
+								"launch": true,
+							},
 						},
 					},
 				},
@@ -108,6 +120,9 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 					Entries: []packit.BuildpackPlanEntry{
 						{
 							Name: "staticfile",
+							Metadata: map[string]interface{}{
+								"launch": true,
+							},
 						},
 					},
 				},
@@ -123,6 +138,15 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 						Build:  false,
 						Launch: true,
 						Cache:  false,
+					},
+				},
+			}))
+
+			Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
+				{
+					Name: "staticfile",
+					Metadata: map[string]interface{}{
+						"launch": true,
 					},
 				},
 			}))
@@ -145,7 +169,7 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 		})
 	})
 
-	when("the layers directory cannot be written to", func() {
+	when("the layers directory cannot be read", func() {
 		it.Before(func() {
 			Expect(os.Chmod(layersDir, 0000)).To(Succeed())
 		})

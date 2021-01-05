@@ -13,6 +13,7 @@ func main() {
 	configInstaller := staticfile.NewConfigInstaller()
 	profileDWriter := staticfile.NewProfileDWriter()
 	logEmitter := staticfile.NewLogEmitter(os.Stdout)
+	planEntryResolver := staticfile.NewPlanEntryResolver(logEmitter)
 
 	packit.Run(
 		staticfile.Detect(parser),
@@ -20,6 +21,7 @@ func main() {
 			configInstaller,
 			parser,
 			profileDWriter,
+			planEntryResolver,
 			logEmitter,
 			chronos.DefaultClock,
 		),
