@@ -13,6 +13,10 @@ type BpYMLParser interface {
 	Parse(path string) (config Config, err error)
 }
 
+type BuildPlanMetadata struct {
+	Launch bool `toml:"launch"`
+}
+
 func Detect(bpYMLParser BpYMLParser) packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
 
@@ -35,9 +39,15 @@ func Detect(bpYMLParser BpYMLParser) packit.DetectFunc {
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: NginxDependency,
+						Metadata: BuildPlanMetadata{
+							Launch: true,
+						},
 					},
 					{
 						Name: StaticfileDependency,
+						Metadata: BuildPlanMetadata{
+							Launch: true,
+						},
 					},
 				},
 			},
