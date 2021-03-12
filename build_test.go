@@ -128,10 +128,11 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 				},
 				Layers: []packit.Layer{
 					{
-						Name:      "staticfile",
-						Path:      filepath.Join(layersDir, "staticfile"),
-						LaunchEnv: packit.Environment{},
-						BuildEnv:  packit.Environment{},
+						Name:             "staticfile",
+						Path:             filepath.Join(layersDir, "staticfile"),
+						LaunchEnv:        packit.Environment{},
+						ProcessLaunchEnv: map[string]packit.Environment{},
+						BuildEnv:         packit.Environment{},
 						SharedEnv: packit.Environment{
 							"APP_ROOT.default": workingDir,
 						},
