@@ -6,7 +6,7 @@ api = "0.4"
   version = "0.0.2"
 
 [metadata]
-  include-files = ["bin/build","bin/detect","bin/run","buildpack.toml","server_configs/nginx.conf"]
+  include-files = ["bin/build", "bin/detect", "bin/run", "buildpack.toml", "server_configs/nginx.conf"]
   pre-package = "./scripts/build.sh"
 
 [[stacks]]
@@ -14,4 +14,3 @@ api = "0.4"
 
 [[stacks]]
   id = "io.buildpacks.stacks.bionic"
-
