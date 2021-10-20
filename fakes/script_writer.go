@@ -4,7 +4,7 @@ import "sync"
 
 type ScriptWriter struct {
 	WriteInitScriptCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			ProfileDPath string
@@ -15,7 +15,7 @@ type ScriptWriter struct {
 		Stub func(string) error
 	}
 	WriteStartLoggingScriptCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			ProfileDPath string
@@ -28,8 +28,8 @@ type ScriptWriter struct {
 }
 
 func (f *ScriptWriter) WriteInitScript(param1 string) error {
-	f.WriteInitScriptCall.Lock()
-	defer f.WriteInitScriptCall.Unlock()
+	f.WriteInitScriptCall.mutex.Lock()
+	defer f.WriteInitScriptCall.mutex.Unlock()
 	f.WriteInitScriptCall.CallCount++
 	f.WriteInitScriptCall.Receives.ProfileDPath = param1
 	if f.WriteInitScriptCall.Stub != nil {
@@ -38,8 +38,8 @@ func (f *ScriptWriter) WriteInitScript(param1 string) error {
 	return f.WriteInitScriptCall.Returns.Error
 }
 func (f *ScriptWriter) WriteStartLoggingScript(param1 string) error {
-	f.WriteStartLoggingScriptCall.Lock()
-	defer f.WriteStartLoggingScriptCall.Unlock()
+	f.WriteStartLoggingScriptCall.mutex.Lock()
+	defer f.WriteStartLoggingScriptCall.mutex.Unlock()
 	f.WriteStartLoggingScriptCall.CallCount++
 	f.WriteStartLoggingScriptCall.Receives.ProfileDPath = param1
 	if f.WriteStartLoggingScriptCall.Stub != nil {

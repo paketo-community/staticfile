@@ -8,7 +8,7 @@ import (
 
 type BpYMLParser struct {
 	ParseCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			Path string
@@ -20,7 +20,7 @@ type BpYMLParser struct {
 		Stub func(string) (staticfile.Config, error)
 	}
 	ValidConfigCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			Path string
@@ -34,8 +34,8 @@ type BpYMLParser struct {
 }
 
 func (f *BpYMLParser) Parse(param1 string) (staticfile.Config, error) {
-	f.ParseCall.Lock()
-	defer f.ParseCall.Unlock()
+	f.ParseCall.mutex.Lock()
+	defer f.ParseCall.mutex.Unlock()
 	f.ParseCall.CallCount++
 	f.ParseCall.Receives.Path = param1
 	if f.ParseCall.Stub != nil {
@@ -44,8 +44,8 @@ func (f *BpYMLParser) Parse(param1 string) (staticfile.Config, error) {
 	return f.ParseCall.Returns.Config, f.ParseCall.Returns.Err
 }
 func (f *BpYMLParser) ValidConfig(param1 string) (bool, error) {
-	f.ValidConfigCall.Lock()
-	defer f.ValidConfigCall.Unlock()
+	f.ValidConfigCall.mutex.Lock()
+	defer f.ValidConfigCall.mutex.Unlock()
 	f.ValidConfigCall.CallCount++
 	f.ValidConfigCall.Receives.Path = param1
 	if f.ValidConfigCall.Stub != nil {

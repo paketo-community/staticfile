@@ -5,24 +5,22 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
+	"github.com/paketo-buildpacks/packit/draft"
+	"github.com/paketo-buildpacks/packit/scribe"
 	"github.com/paketo-community/staticfile"
 )
 
 func main() {
 	parser := staticfile.NewBuildpackYMLParser()
-	configInstaller := staticfile.NewConfigInstaller()
-	profileDWriter := staticfile.NewProfileDWriter()
-	logEmitter := staticfile.NewLogEmitter(os.Stdout)
-	planEntryResolver := staticfile.NewPlanEntryResolver(logEmitter)
 
 	packit.Run(
 		staticfile.Detect(parser),
 		staticfile.Build(
-			configInstaller,
+			staticfile.NewConfigInstaller(),
 			parser,
-			profileDWriter,
-			planEntryResolver,
-			logEmitter,
+			staticfile.NewProfileDWriter(),
+			draft.NewPlanner(),
+			scribe.NewEmitter(os.Stdout),
 			chronos.DefaultClock,
 		),
 	)

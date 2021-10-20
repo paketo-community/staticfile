@@ -13,8 +13,6 @@ func TestUnit(t *testing.T) {
 	suite("BuildpackYAMLParser", testBuildpackYAMLParser)
 	suite("ConfigInstaller", testConfigInstaller)
 	suite("Detect", testDetect)
-	suite("LogEmitter", testLogEmitter)
 	suite("ProfileDWriter", testProfileDWriter)
-	suite("PlanEntryResolver", testPlanEntryResolver)
 	suite.Run(t)
 }

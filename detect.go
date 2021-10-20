@@ -32,9 +32,7 @@ func Detect(bpYMLParser BpYMLParser) packit.DetectFunc {
 		return packit.DetectResult{
 			Plan: packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
-					{
-						Name: StaticfileDependency,
-					},
+					{Name: StaticfileDependency},
 				},
 				Requires: []packit.BuildPlanRequirement{
 					{

@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
+	"github.com/paketo-buildpacks/packit/scribe"
 	"github.com/paketo-community/staticfile"
 	"github.com/paketo-community/staticfile/fakes"
 	"github.com/sclevine/spec"
@@ -59,7 +60,6 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 		}
 
 		buffer = bytes.NewBuffer(nil)
-		logEmitter := staticfile.NewLogEmitter(buffer)
 
 		timeStamp = time.Now()
 		clock = chronos.NewClock(func() time.Time {
@@ -71,7 +71,7 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 			bpYMLParser,
 			scriptWriter,
 			entryResolver,
-			logEmitter,
+			scribe.NewEmitter(buffer),
 			clock,
 		)
 	})
@@ -116,16 +116,6 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(packit.BuildResult{
-				Plan: packit.BuildpackPlan{
-					Entries: []packit.BuildpackPlanEntry{
-						{
-							Name: "staticfile",
-							Metadata: map[string]interface{}{
-								"launch": true,
-							},
-						},
-					},
-				},
 				Layers: []packit.Layer{
 					{
 						Name:             "staticfile",
@@ -143,7 +133,8 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 				},
 			}))
 
-			Expect(entryResolver.ResolveCall.Receives.BuildpackPlanEntrySlice).To(Equal([]packit.BuildpackPlanEntry{
+			Expect(entryResolver.ResolveCall.Receives.Name).To(Equal("staticfile"))
+			Expect(entryResolver.ResolveCall.Receives.Entries).To(Equal([]packit.BuildpackPlanEntry{
 				{
 					Name: "staticfile",
 					Metadata: map[string]interface{}{
@@ -166,7 +157,8 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 			Expect(buffer.String()).To(ContainSubstring("Parsing buildpack.yml for nginx config"))
 			Expect(buffer.String()).To(ContainSubstring("Writing profile.d scripts"))
 			Expect(buffer.String()).To(ContainSubstring("Executing build process"))
-			Expect(buffer.String()).To(ContainSubstring("Configuring environment"))
+			Expect(buffer.String()).To(ContainSubstring("Configuring build environment"))
+			Expect(buffer.String()).To(ContainSubstring("Configuring launch environment"))
 		})
 	})
 

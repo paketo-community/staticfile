@@ -9,7 +9,7 @@ import (
 
 type InstallProcess struct {
 	ExecuteCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
 			Context     packit.BuildContext
@@ -23,8 +23,8 @@ type InstallProcess struct {
 }
 
 func (f *InstallProcess) Execute(param1 packit.BuildContext, param2 staticfile.Config) error {
-	f.ExecuteCall.Lock()
-	defer f.ExecuteCall.Unlock()
+	f.ExecuteCall.mutex.Lock()
+	defer f.ExecuteCall.mutex.Unlock()
 	f.ExecuteCall.CallCount++
 	f.ExecuteCall.Receives.Context = param1
 	f.ExecuteCall.Receives.TemplConfig = param2
