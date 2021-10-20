@@ -7,6 +7,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit"
 	"github.com/paketo-buildpacks/packit/chronos"
+	"github.com/paketo-buildpacks/packit/scribe"
 )
 
 //go:generate faux --interface InstallProcess --output fakes/install_process.go
@@ -16,7 +17,7 @@ type InstallProcess interface {
 
 //go:generate faux --interface EntryResolver --output fakes/entry_resolver.go
 type EntryResolver interface {
-	Resolve([]packit.BuildpackPlanEntry) packit.BuildpackPlanEntry
+	Resolve(name string, entries []packit.BuildpackPlanEntry, priorities []interface{}) (packit.BuildpackPlanEntry, []packit.BuildpackPlanEntry)
 }
 
 //go:generate faux --interface ScriptWriter --output fakes/script_writer.go
@@ -30,7 +31,7 @@ func Build(
 	bpYMLParser BpYMLParser,
 	scriptWriter ScriptWriter,
 	entryResolver EntryResolver,
-	logger LogEmitter,
+	logger scribe.Emitter,
 	clock chronos.Clock,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
@@ -42,27 +43,27 @@ func Build(
 			return packit.BuildResult{}, fmt.Errorf("failed to parse buildpack.yml: %v", err)
 		}
 
-		staticfileLayer, err := context.Layers.Get(LayerNameStaticfile)
+		layer, err := context.Layers.Get(LayerNameStaticfile)
 		if err != nil {
 			return packit.BuildResult{}, fmt.Errorf("failed to get layer: %v", err)
 		}
 
-		entry := entryResolver.Resolve(context.Plan.Entries)
+		entry, _ := entryResolver.Resolve(StaticfileDependency, context.Plan.Entries, nil)
 
-		staticfileLayer, err = staticfileLayer.Reset()
+		layer, err = layer.Reset()
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
-		staticfileLayer.Launch = entry.Metadata["launch"] == true
+		layer.Launch = entry.Metadata["launch"] == true
 
 		logger.Process("Writing profile.d scripts")
-		err = scriptWriter.WriteInitScript(filepath.Join(staticfileLayer.Path, "profile.d"))
+		err = scriptWriter.WriteInitScript(filepath.Join(layer.Path, "profile.d"))
 		if err != nil {
 			return packit.BuildResult{}, fmt.Errorf("failed to write init script: %v", err)
 		}
 
-		err = scriptWriter.WriteStartLoggingScript(filepath.Join(staticfileLayer.Path, "profile.d"))
+		err = scriptWriter.WriteStartLoggingScript(filepath.Join(layer.Path, "profile.d"))
 		if err != nil {
 			return packit.BuildResult{}, fmt.Errorf("failed to write start_logging script: %v", err)
 		}
@@ -80,12 +81,11 @@ func Build(
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
-		staticfileLayer.SharedEnv.Default("APP_ROOT", context.WorkingDir)
-		logger.Environment(staticfileLayer.SharedEnv)
+		layer.SharedEnv.Default("APP_ROOT", context.WorkingDir)
+		logger.EnvironmentVariables(layer)
 
 		return packit.BuildResult{
-			Plan:   context.Plan,
-			Layers: []packit.Layer{staticfileLayer},
+			Layers: []packit.Layer{layer},
 		}, nil
 	}
 }

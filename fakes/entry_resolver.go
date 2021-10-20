@@ -8,25 +8,33 @@ import (
 
 type EntryResolver struct {
 	ResolveCall struct {
-		sync.Mutex
+		mutex     sync.Mutex
 		CallCount int
 		Receives  struct {
-			BuildpackPlanEntrySlice []packit.BuildpackPlanEntry
+			Name       string
+			Entries    []packit.BuildpackPlanEntry
+			Priorities []interface {
+			}
 		}
 		Returns struct {
-			BuildpackPlanEntry packit.BuildpackPlanEntry
+			BuildpackPlanEntry      packit.BuildpackPlanEntry
+			BuildpackPlanEntrySlice []packit.BuildpackPlanEntry
 		}
-		Stub func([]packit.BuildpackPlanEntry) packit.BuildpackPlanEntry
+		Stub func(string, []packit.BuildpackPlanEntry, []interface {
+		}) (packit.BuildpackPlanEntry, []packit.BuildpackPlanEntry)
 	}
 }
 
-func (f *EntryResolver) Resolve(param1 []packit.BuildpackPlanEntry) packit.BuildpackPlanEntry {
-	f.ResolveCall.Lock()
-	defer f.ResolveCall.Unlock()
+func (f *EntryResolver) Resolve(param1 string, param2 []packit.BuildpackPlanEntry, param3 []interface {
+}) (packit.BuildpackPlanEntry, []packit.BuildpackPlanEntry) {
+	f.ResolveCall.mutex.Lock()
+	defer f.ResolveCall.mutex.Unlock()
 	f.ResolveCall.CallCount++
-	f.ResolveCall.Receives.BuildpackPlanEntrySlice = param1
+	f.ResolveCall.Receives.Name = param1
+	f.ResolveCall.Receives.Entries = param2
+	f.ResolveCall.Receives.Priorities = param3
 	if f.ResolveCall.Stub != nil {
-		return f.ResolveCall.Stub(param1)
+		return f.ResolveCall.Stub(param1, param2, param3)
 	}
-	return f.ResolveCall.Returns.BuildpackPlanEntry
+	return f.ResolveCall.Returns.BuildpackPlanEntry, f.ResolveCall.Returns.BuildpackPlanEntrySlice
 }

@@ -57,18 +57,18 @@ func testLogging(t *testing.T, when spec.G, it spec.S) {
 				Execute(name, source)
 			Expect(err).NotTo(HaveOccurred(), logs.String)
 
-			buildpackVersion, err := GetGitVersion()
-			Expect(err).NotTo(HaveOccurred())
-
 			Expect(logs).To(ContainLines(
-				fmt.Sprintf("Staticfile Buildpack %s", buildpackVersion),
+				"Staticfile Buildpack 1.2.3",
 				"  Parsing buildpack.yml for nginx config",
 				"  Writing profile.d scripts",
 				"  Executing build process",
 				`    Filling out nginx.conf template`,
 				MatchRegexp(`      Completed in \d+\.?\d*`),
 				"",
-				"  Configuring environment",
+				"  Configuring build environment",
+				`    APP_ROOT -> "/workspace"`,
+				"",
+				"  Configuring launch environment",
 				`    APP_ROOT -> "/workspace"`,
 			))
 		})
