@@ -1,7 +1,6 @@
 package staticfile_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,13 +26,13 @@ func testBuildpackYAMLParser(t *testing.T, when spec.G, it spec.S) {
 		when("buildpack.yml exists", func() {
 
 			it.Before(func() {
-				file, err := ioutil.TempFile("", "buildpack.yml")
+				file, err := os.CreateTemp("", "buildpack.yml")
 				Expect(err).NotTo(HaveOccurred())
 				defer file.Close()
 
 				path = file.Name()
 
-				err = ioutil.WriteFile(path, []byte(`---
+				err = os.WriteFile(path, []byte(`---
 staticfile:
   nginx:
     root: some-root-dir
@@ -74,7 +73,7 @@ staticfile:
 
 			when("the root dir is not specified", func() {
 				it.Before(func() {
-					err := ioutil.WriteFile(path, []byte(`---
+					err := os.WriteFile(path, []byte(`---
 staticfile:
   nginx: {}
 `), os.ModePerm)
@@ -94,13 +93,13 @@ staticfile:
 	when("ValidConfig", func() {
 		when("the buildpack.yml indicates the user wants to generate an nginx config", func() {
 			it.Before(func() {
-				file, err := ioutil.TempFile("", "buildpack.yml")
+				file, err := os.CreateTemp("", "buildpack.yml")
 				Expect(err).NotTo(HaveOccurred())
 				defer file.Close()
 
 				path = file.Name()
 
-				err = ioutil.WriteFile(path, []byte(`---
+				err = os.WriteFile(path, []byte(`---
 staticfile:
   nginx: {}
 `), os.ModePerm)
@@ -117,13 +116,13 @@ staticfile:
 
 		when("the buildpack.yml indicates the user does not want to generate an nginx config", func() {
 			it.Before(func() {
-				file, err := ioutil.TempFile("", "buildpack.yml")
+				file, err := os.CreateTemp("", "buildpack.yml")
 				Expect(err).NotTo(HaveOccurred())
 				defer file.Close()
 
 				path = file.Name()
 
-				err = ioutil.WriteFile(path, []byte(`---
+				err = os.WriteFile(path, []byte(`---
 staticfile:
 `), os.ModePerm)
 				Expect(err).NotTo(HaveOccurred())
@@ -153,11 +152,11 @@ staticfile:
 			var workingDir string
 			it.Before(func() {
 				var err error
-				workingDir, err = ioutil.TempDir("", "workingDir")
+				workingDir, err = os.MkdirTemp("", "workingDir")
 				Expect(err).NotTo(HaveOccurred())
 
 				path = filepath.Join(workingDir, "buildpack.yml")
-				err = ioutil.WriteFile(path, []byte(``), os.ModePerm)
+				err = os.WriteFile(path, []byte(``), os.ModePerm)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(os.Chmod(workingDir, 0000)).To(Succeed())
@@ -173,7 +172,7 @@ staticfile:
 		})
 		when("buildpack.yml is malformed", func() {
 			it.Before(func() {
-				file, err := ioutil.TempFile("", "buildpack.yml")
+				file, err := os.CreateTemp("", "buildpack.yml")
 				Expect(err).NotTo(HaveOccurred())
 				path = file.Name()
 			})

@@ -1,7 +1,6 @@
 package staticfile_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -24,10 +23,10 @@ func testConfigInstaller(t *testing.T, when spec.G, it spec.S) {
 	)
 	it.Before(func() {
 		var err error
-		buildpackDir, err = ioutil.TempDir("", "buildpackDir")
+		buildpackDir, err = os.MkdirTemp("", "buildpackDir")
 		Expect(err).NotTo(HaveOccurred())
 
-		workingDir, err = ioutil.TempDir("", "workingDir")
+		workingDir, err = os.MkdirTemp("", "workingDir")
 		Expect(err).NotTo(HaveOccurred())
 
 		config = staticfile.Config{
@@ -53,7 +52,7 @@ func testConfigInstaller(t *testing.T, when spec.G, it spec.S) {
 
 			confPath := filepath.Join(buildpackDir, "server_configs", "nginx.conf")
 
-			err := ioutil.WriteFile(confPath, []byte(`$(( .LocationInclude ))`), os.ModePerm)
+			err := os.WriteFile(confPath, []byte(`$(( .LocationInclude ))`), os.ModePerm)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -76,7 +75,7 @@ func testConfigInstaller(t *testing.T, when spec.G, it spec.S) {
 			appConfPath := filepath.Join(workingDir, "nginx.conf")
 			Expect(appConfPath).To(BeARegularFile())
 
-			contents, err := ioutil.ReadFile(appConfPath)
+			contents, err := os.ReadFile(appConfPath)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(string(contents)).To(Equal("some-location"))
@@ -90,7 +89,7 @@ func testConfigInstaller(t *testing.T, when spec.G, it spec.S) {
 
 				confPath := filepath.Join(buildpackDir, "server_configs", "does-not-exist")
 
-				err := ioutil.WriteFile(confPath, []byte(`$(( .LocationInclude ))`), os.ModePerm)
+				err := os.WriteFile(confPath, []byte(`$(( .LocationInclude ))`), os.ModePerm)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -120,7 +119,7 @@ func testConfigInstaller(t *testing.T, when spec.G, it spec.S) {
 
 				confPath := filepath.Join(buildpackDir, "server_configs", "nginx.conf")
 
-				err := ioutil.WriteFile(confPath, []byte(`$(( .LocationInclude ))`), os.ModePerm)
+				err := os.WriteFile(confPath, []byte(`$(( .LocationInclude ))`), os.ModePerm)
 				Expect(err).NotTo(HaveOccurred())
 
 				err = os.RemoveAll(workingDir)
