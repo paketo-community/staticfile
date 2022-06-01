@@ -2,7 +2,6 @@ package staticfile
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -28,7 +27,7 @@ func writeScript(dir, file, contents string) error {
 	}
 
 	scriptPath := filepath.Join(dir, file)
-	err = ioutil.WriteFile(scriptPath, []byte(contents), 0744)
+	err = os.WriteFile(scriptPath, []byte(contents), 0744)
 
 	if err != nil {
 		return fmt.Errorf("could not write the %s script: %v", file, err)
