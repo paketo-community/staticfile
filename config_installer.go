@@ -8,7 +8,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 )
 
 type ConfigInstaller struct{}
