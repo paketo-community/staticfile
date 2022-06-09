@@ -1,7 +1,6 @@
 package staticfile_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -22,7 +21,7 @@ func testProfileDWriter(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		layersDir, err = ioutil.TempDir("", "layers")
+		layersDir, err = os.MkdirTemp("", "layers")
 		Expect(err).NotTo(HaveOccurred())
 
 		profileDWriter = staticfile.NewProfileDWriter()
@@ -40,7 +39,7 @@ func testProfileDWriter(t *testing.T, when spec.G, it spec.S) {
 			err := profileDWriter.WriteInitScript(profileDDest)
 			Expect(err).NotTo(HaveOccurred())
 
-			contents, err := ioutil.ReadFile(filepath.Join(profileDDest, "00_staticfile.sh"))
+			contents, err := os.ReadFile(filepath.Join(profileDDest, "00_staticfile.sh"))
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(string(contents)).To(Equal(staticfile.InitScriptContents))
@@ -53,7 +52,7 @@ func testProfileDWriter(t *testing.T, when spec.G, it spec.S) {
 			err := profileDWriter.WriteStartLoggingScript(profileDDest)
 			Expect(err).NotTo(HaveOccurred())
 
-			contents, err := ioutil.ReadFile(filepath.Join(profileDDest, "01_start_logging.sh"))
+			contents, err := os.ReadFile(filepath.Join(profileDDest, "01_start_logging.sh"))
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(string(contents)).To(Equal(staticfile.StartLoggingContents))
@@ -64,7 +63,7 @@ func testProfileDWriter(t *testing.T, when spec.G, it spec.S) {
 		when("it can not create the profile.d directory", func() {
 			it("errors", func() {
 				profileDDest := filepath.Join(layersDir, "profile.d")
-				err := ioutil.WriteFile(profileDDest, []byte(``), 0000)
+				err := os.WriteFile(profileDDest, []byte(``), 0000)
 				Expect(err).NotTo(HaveOccurred())
 
 				err = profileDWriter.WriteStartLoggingScript(profileDDest)
@@ -79,7 +78,7 @@ func testProfileDWriter(t *testing.T, when spec.G, it spec.S) {
 				err := os.MkdirAll(profileDDest, 0744)
 				Expect(err).NotTo(HaveOccurred())
 
-				err = ioutil.WriteFile(filepath.Join(profileDDest, "01_start_logging.sh"), []byte(``), 0000)
+				err = os.WriteFile(filepath.Join(profileDDest, "01_start_logging.sh"), []byte(``), 0000)
 				Expect(err).NotTo(HaveOccurred())
 
 				err = profileDWriter.WriteStartLoggingScript(profileDDest)

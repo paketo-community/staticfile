@@ -3,12 +3,12 @@ package staticfile
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 )
 
 type ConfigInstaller struct{}
@@ -35,7 +35,7 @@ func (ci ConfigInstaller) Execute(context packit.BuildContext, templConfig Confi
 		return err
 	}
 
-	err = ioutil.WriteFile(confDest, []byte(confContents), 0644)
+	err = os.WriteFile(confDest, []byte(confContents), 0644)
 
 	if err != nil {
 		return fmt.Errorf("could not write nginx conf file to working dir: %w", err)
@@ -60,7 +60,7 @@ func supportedServers() []string {
 func generateConf(configPath string, templConfig Config) (string, error) {
 	buffer := new(bytes.Buffer)
 
-	config, err := ioutil.ReadFile(configPath)
+	config, err := os.ReadFile(configPath)
 	if err != nil {
 		return "", fmt.Errorf("could not find template file: %w", err)
 	}

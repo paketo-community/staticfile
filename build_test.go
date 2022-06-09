@@ -4,16 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/packit"
-	"github.com/paketo-buildpacks/packit/chronos"
-	"github.com/paketo-buildpacks/packit/scribe"
+	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/paketo-community/staticfile"
 	"github.com/paketo-community/staticfile/fakes"
 	"github.com/sclevine/spec"
@@ -41,10 +40,10 @@ func testBuild(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		layersDir, err = ioutil.TempDir("", "layers")
+		layersDir, err = os.MkdirTemp("", "layers")
 		Expect(err).NotTo(HaveOccurred())
 
-		workingDir, err = ioutil.TempDir("", "working-dir")
+		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
 		installProcess = &fakes.InstallProcess{}

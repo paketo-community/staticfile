@@ -2,11 +2,10 @@ package staticfile_test
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/paketo-buildpacks/packit"
+	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-community/staticfile"
 	"github.com/paketo-community/staticfile/fakes"
 	"github.com/sclevine/spec"
@@ -25,7 +24,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		workingDir, err = ioutil.TempDir("", "working-dir")
+		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
 		bpYMLParser = &fakes.BpYMLParser{}
